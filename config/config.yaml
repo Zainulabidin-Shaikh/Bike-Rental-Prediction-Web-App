@@ -1,0 +1,193 @@
+ui: # user interface
+  default_lookback_hours: 12
+  update_interval_ms: 1000
+  axis_font_color: "#222"
+
+# 1️⃣ ui: → User Interface Settings
+
+#   💡 What it does:
+
+# Controls how the dashboard (like a web app) behaves
+
+# default_lookback_hours: 12 → Show last 12 hours of data by default
+# update_interval_ms: 1000 → Refresh every 1 second
+# axis_font_color: "#222" → Black font color
+
+# 🎯 Why?
+# So you can tweak the UI without coding.
+
+inference_api:
+  host: localhost
+  port: 5001
+  endpoint: /run-inference
+
+# 2️⃣ inference_api: → API Settings
+
+# inference_api:
+#   host: localhost
+#   port: 5001
+#   endpoint: /run-inference
+
+# 💡 What it does:
+
+# Where your prediction API runs
+
+# host: localhost → Runs on your computer
+# port: 5001 → You’ll access it at http://localhost:5001
+# endpoint: /run-inference → Send POST requests to /run-inference
+
+# 🎯 Why?
+# So you can change the port (e.g., to 8000) without editing code.
+
+
+data_manager:
+  raw_data_folder: './data/raw_data/'
+  prod_data_folder: './data/prod_data/'
+  raw_database_name: 'database.parquet'
+  prod_database_name: 'database_prod.parquet'
+  real_time_data_prod_name: 'real_time_data_prod.parquet'
+  real_time_prediction_data_name: 'real_time_prediction.parquet'
+
+# 3️⃣ data_manager: → Data Folder Settings
+
+# 💡 What it does:
+
+# Tells the code where to find and save data
+# raw_data_folder → Where raw CSV/Parquet files are
+# prod_database_name → Name of the cleaned data file
+
+# 🎯 Why?
+
+# If you move data to ./data_v2/, just change the config — not the code.
+
+pipeline_runner:
+  batch_size: 30
+  model_path: 'models/prod/latest_model'
+  first_timestamp: '2012-08-07 12:00:00'
+  last_timestamp: '2012-12-31 23:00:00'
+  time_increment: '1h'
+
+# 4️⃣ pipeline_runner: → Automation Settings
+
+# 💡 What it does:
+
+# Controls how the pipeline runs
+# model_path → Where to save/load the trained model
+# first_timestamp → Start date for simulation
+# time_increment: '1h' → Simulate hour by hour
+
+# 🎯 Why?
+
+# So you can test with a small date range first, then scale up — no code change.
+
+preprocessing:
+  column_mapping:
+    'season': 'season'
+    'yr': 'year'
+    'mnth': 'month'
+    'hr': 'hour'
+    'weekday': 'week_day'
+    'workingday': 'working_day'
+    'weathersit': 'weather'
+    'temp': 'temperature'
+    'atemp': 'temperature_feel'
+    'hum': 'humidity'
+    'windspeed': 'wind_speed'
+    'cnt': 'bike_count'
+
+  drop_columns: [
+    'datetime', 'year', 'casual', 'registered'
+  ]
+
+# 5️⃣ preprocessing: → Data Cleaning Rules
+
+# 💡 What it does:
+
+# column_mapping: Rename columns (e.g., yr → year)
+# drop_columns: Remove unneeded columns
+
+# 🎯 Why?
+
+# So if you later want to keep casual, just remove it from the list — no code edit.
+
+
+feature_engineering:
+  lag_params:
+    'bike_count': [1, 2, 22, 23]
+    'hour': [1, 2, 3]
+    'week_day': [1, 2, 3]
+    'weather': [1, 2, 3]
+    'temperature': [1, 2, 3]
+    'humidity': [1, 2, 3]
+
+# 6️⃣ feature_engineering: → Lag Features
+
+# 💡 What it does:
+
+# Says: "Create lag features for bike_count at 1hr, 2hr, 22hr, 23hr ago"
+# Why 22 and 23? To capture daily patterns (e.g., yesterday’s rush hour)
+
+# 🎯 Why?
+
+# So you can experiment with lags without touching code.
+
+training:
+  target_params:
+    shift_period: 1
+    target_column: 'bike_count'
+    new_target_name: 'target'
+  train_fraction: 0.85
+  iterations: 100
+  loss_function: RMSE
+  verbose: 0
+  early_stopping_rounds: 100
+
+# 7️⃣ training: → Model Training Settings
+
+# 💡 What it does:
+
+# shift_period: 1 → Predict next hour (cnt.shift(-1))
+# train_fraction: 0.85 → Use 85% for training
+# early_stopping_rounds: 100 → Stop if no improvement
+
+# 🎯 Why?
+
+# So you can try train_fraction: 0.8 or 0.9 — no code change.
+
+
+  optuna:
+    n_trials: 5
+    search_space:
+      learning_rate:
+        low: 0.01
+        high: 0.2
+        log: false
+      depth:
+        low: 3
+        high: 8
+      l2_leaf_reg:
+        low: 0.5
+        high: 5
+        log: false
+
+# 8️⃣ optuna: → Hyperparameter Search
+
+# 💡 What it does:
+
+# Tells Optuna: "Try 5 trials, with learning_rate between 0.01 and 0.2"
+
+# 🎯 Why?
+
+# So you can increase n_trials: 50 later — without editing code.
+
+# ______________________________________________________________________________________________________________________
+
+# 🛠️ Example: Want to Change Model Path?
+# Instead of editing code, just change:
+
+# model_path: 'models/prod/latest_model'
+
+# to:
+
+# model_path: 'models/v2/best_model'
+# ✅ Done — no code change.

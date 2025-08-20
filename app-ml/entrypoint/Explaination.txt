@@ -1,0 +1,112 @@
+---------------------num_timestamps---------------------
+
+✅ Short Answer
+num_timestamps = 200 means:
+
+"Run the inference (prediction) pipeline for 200 time steps (e.g., 200 hours)." 
+
+It’s like saying:
+
+"Start at 2012-08-07 12:00, then predict for the next 200 hours, one by one." 
+
+This is used to simulate real-time predictions over time.
+
+🧱 Let’s Understand the Big Picture
+Your system is simulating how a real-time forecasting app would work:
+
+At each hour →
+  1. Get current data
+  2. Make a prediction for the next hour
+  3. Save it
+  4. Move to the next hour
+
+🔍 What is num_timestamps?
+
+num_timestamps = 200
+
+💡 It means:
+"Run the inference loop 200 times — one for each timestamp (hour)." 
+
+Each time:
+
+You predict bike rentals for that hour
+You move forward by 1 hour (time_increment = '1h')
+You repeat until you’ve done 200 steps
+
+🕰️ How Does It Work?
+
+From your config.yaml:
+
+pipeline_runner:
+  first_timestamp: '2012-08-07 12:00:00'
+  time_increment: '1h'
+
+So:
+
+1       2012-08-07 12:00
+2       2012-08-07 13:00
+3       2012-08-07 14:00
+...
+...
+200     2012-08-15 11:00
+
+👉 The loop runs 200 times, advancing by 1 hour each time.
+
+🔄 Why Use a Loop Instead of Predicting All at Once?
+Because in real life, you don’t have all future data.
+
+You want to simulate:
+
+"At 12 PM, I only know up to 12 PM — so I predict 1 PM.
+At 1 PM, I now know 1 PM data — so I predict 2 PM.
+And so on." 
+
+This is called walk-forward validation or simulated real-time inference.
+
+It’s more realistic than predicting everything at once.
+
+🎯 Why 200? Why Not 1000 or 10?
+
+✅ Because:
+
+The dataset is large — running all 10,000 hours would take too long.
+You want to test the pipeline quickly during development.
+
+200 is enough to:
+
+See if the model works
+Generate a nice plot
+Debug issues
+But not waste time
+
+🛠️ Think of it like a test run — not the full production job. 
+
+🧠 Analogy: Like a Clock Ticking
+Imagine you're a weather forecaster:
+
+"Every hour, I look at current conditions and predict tomorrow’s temperature." 
+
+You don’t predict a year in advance — you do it step by step.
+
+That’s what this code does:
+
+for i in range(num_timestamps):
+    pipeline_runner.run_inference(current_timestamp)
+    current_timestamp += time_increment
+
+It’s like:
+
+Tick → Predict → Tick → Predict → ... 
+
+📊 After the Loop: Plotting Results
+At the end:
+
+predictions_df = data_manager.load_prediction_data()
+actual_df = data_manager.load_prod_data()
+plot_predictions_vs_actual(predictions_df, actual_df)
+
+Now you can see:
+
+How well your predictions match actual values
+Over a 200-hour window
+Like a real dashboard would show
