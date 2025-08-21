@@ -221,7 +221,13 @@ def trigger_inference(n_clicks):
 
 server = app.server
 
+# if __name__ == '__main__':
+#     # Use debug=True for development, debug=False for production
+#     # app.run(debug=True, use_reloader=False, host='0.0.0.0', port=8050)
+#     app.run(debug=False, use_reloader=False, host='127.0.0.1', port=8051)
+
+# for deploying on Sliplane I am commenting the above code and using the below code
+
 if __name__ == '__main__':
-    # Use debug=True for development, debug=False for production
-    # app.run(debug=True, use_reloader=False, host='0.0.0.0', port=8050)
-    app.run(debug=False, use_reloader=False, host='127.0.0.1', port=8051)
+    port = int(os.getenv("PORT", 8050))
+    app.run(debug=False, use_reloader=False, host="0.0.0.0", port=port)

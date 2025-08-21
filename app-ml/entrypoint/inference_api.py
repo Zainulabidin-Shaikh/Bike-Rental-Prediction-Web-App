@@ -54,4 +54,8 @@ if __name__ == "__main__":
     pipeline_runner = PipelineRunner(config, data_manager)
 
     # Start the app
-    app.run(host="0.0.0.0", port=5001) 
+    # app.run(host="0.0.0.0", port=5001) 
+    # commented the above line to deploy on Sliplane. Using the below code
+
+    port = int(os.getenv("PORT", 5001))
+    app.run(host="0.0.0.0", port=port)
