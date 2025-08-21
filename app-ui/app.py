@@ -221,6 +221,14 @@ def trigger_inference(n_clicks):
 
 server = app.server
 
+@server.route('/')
+def health_check():
+    return '<h1>Dash App Running</h1>', 200
+
+@server.route('/health')
+def health():
+    return {'status': 'ok'}, 200
+
 if __name__ == '__main__':
 #     # Use debug=True for development, debug=False for production
     # app.run(debug=True, use_reloader=False, host='0.0.0.0', port=8050)
